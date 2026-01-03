@@ -1,16 +1,12 @@
 """Blink(1) Status Light integration."""
 import logging
 
-import voluptuous as vol
-
-import homeassistant.helpers.config_validation as cv
 import homeassistant.util.color as color_util
 
 # Import the device class from the component that you want to support
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
     ATTR_HS_COLOR,
-    ATTR_SUPPORTED_COLOR_MODES,
     ColorMode,
     LightEntity,
 )
@@ -21,20 +17,34 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Set up the Blink(1) light platform."""
     from blink1.blink1 import Blink1
-    b1 = Blink1()
-    async_add_entities([blink1_status(b1)])    
+
+    try:
+        b1 = Blink1()
+        async_add_entities([blink1_status(b1)])
+        _LOGGER.info("Blink(1) device initialized successfully")
+    except Exception as err:
+        _LOGGER.error("Failed to initialize Blink(1) device: %s", err)
+        _LOGGER.error("Please ensure the Blink(1) device is connected and you have the proper USB permissions")
+        return False    
 
 
 class blink1_status(LightEntity):
     """Representation of a BlinkLight Light."""
 
     def __init__(self, light):
-        """Initialize an AwesomeLight."""
+        """Initialize a Blink(1) Status Light."""
         self._light = light
         self._name = "Blink1"
         self._state = None
         self._hs_color = [0, 0]
-        self._brightness = 0
+        self._brightness = 255
+        # Generate unique_id from device serial if available, otherwise use fixed ID
+        try:
+            serial = light.get_serial_num()
+            self._unique_id = f"blink1_{serial}"
+        except (AttributeError, Exception):
+            # Fallback to fixed ID if serial not available
+            self._unique_id = "blink1_status_light"
 
     #new
     @property
@@ -57,6 +67,11 @@ class blink1_status(LightEntity):
     def name(self):
         """Return the display name of this light."""
         return self._name
+
+    @property
+    def unique_id(self):
+        """Return a unique ID for this light."""
+        return self._unique_id
 
     @property
     def hs_color(self):

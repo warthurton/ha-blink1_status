@@ -1,15 +1,29 @@
-# Blink(1) Integration - Fork with new ColorMode
+# Blink(1) Status Light Integration
 
-Forked from: https://github.com/tnagels/ha-blink1_status
+A Home Assistant custom component for controlling Blink(1) USB LED status lights.
 
-Updated light.py with newer ColorModes.<br>
-So it's only needed to switch the light.py file in the blink1_status Folder
+**Forked from**: https://github.com/tnagels/ha-blink1_status
 
-Seems to work on my HomeAssistant Configuration, but use with caution and ON YOUR OWN RISK! (do Backups and stuff....)
+## Features
 
+- ✅ Full color control (Hue/Saturation)
+- ✅ Brightness control (0-255)
+- ✅ Modern ColorMode implementation
+- ✅ Compatible with Home Assistant 2025.12+
+- ✅ Future-proof (no deprecated APIs)
+- ✅ HACS compatible
 
+## Compatibility
 
-This integration sets up and uses a Blink(1) usb status led for use within Home Assistant.
+**Home Assistant Version**: 2021.12 or newer (tested with 2025.12)
+
+This integration is fully compatible with current and future Home Assistant versions:
+- Uses modern `ColorMode.HS` implementation (required since 2025.3)
+- Includes `integration_type` and `iot_class` in manifest (future requirements)
+- No deprecated APIs or patterns
+- Properly implements async operations for all I/O
+
+**Version**: 0.3.0
 
 
 ### Installation

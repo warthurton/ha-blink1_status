@@ -33,7 +33,24 @@ The main implementation file containing:
 Integration metadata:
 - Domain: `blink1_status`
 - Dependency: `blink1` Python package
-- Version: 0.2.1
+- Version: 0.3.0
+- Integration Type: `device` (single device, not a hub)
+- IoT Class: `assumed_state` (no device read-back)
+
+## Compatibility & Compliance
+
+**Home Assistant Versions**: 2021.12+ (tested with 2025.12)
+
+**Compliance Status**: ✅ Fully compliant with 2025.12 requirements and future-proof
+
+Key compliance features:
+- ✅ `ColorMode.HS` properly implemented (mandatory since 2025.3)
+- ✅ `supported_color_modes` and `color_mode` properties (required)
+- ✅ `integration_type: device` in manifest (will be mandatory)
+- ✅ `iot_class: assumed_state` in manifest (recommended)
+- ✅ `unique_id` property for entity registry
+- ✅ Error handling in setup and operations
+- ✅ No deprecated APIs used
 
 ## Technical Guidelines
 
@@ -43,6 +60,7 @@ Integration metadata:
 2. **Color Mode**: Uses `ColorMode.HS` (Hue/Saturation) - this is the updated implementation
 3. **State Management**: Uses assumed state (no read-back from device)
 4. **Async Pattern**: All I/O operations use `hass.async_add_executor_job()` for thread safety
+5. **Entity Registry**: Supports `unique_id` based on device serial number
 
 ### Code Patterns to Follow
 

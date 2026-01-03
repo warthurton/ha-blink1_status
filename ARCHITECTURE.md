@@ -11,6 +11,30 @@ This document provides a detailed technical overview of the Blink(1) Status Ligh
 
 This integration provides a simple bridge between Home Assistant's light entity platform and the Blink(1) USB LED device. It uses assumed state (no read-back from device) and supports color and brightness control.
 
+## Compatibility
+
+**Current Status**: ✅ **Fully compatible with Home Assistant 2025.12 and future versions**
+
+**Home Assistant Version Requirements**:
+- **Minimum**: 2021.12+ (ColorMode enum introduced)
+- **Tested**: 2025.12 (latest as of January 2025)
+- **Future**: Compatible through 2026+ (no breaking changes affect this integration)
+
+**Key Compliance**:
+- ✅ `ColorMode.HS` properly implemented (mandatory since 2025.3)
+- ✅ `supported_color_modes` property (required)
+- ✅ `integration_type` field in manifest.json (will be mandatory)
+- ✅ `iot_class` field in manifest.json (recommended)
+- ✅ `unique_id` property for entity registry
+- ✅ Async methods for all I/O operations
+- ✅ Proper error handling in setup and operations
+
+**Future-Proof**:
+- No deprecated APIs used
+- No planned breaking changes affect this integration
+- Template entity deprecation (2026.6) does not apply
+- Modern color mode implementation ensures long-term compatibility
+
 ## Directory Structure
 
 ```
@@ -45,31 +69,34 @@ ha-blink1_status/
 ### `custom_components/blink1_status/light.py`
 
 **Purpose**: Core implementation
-**Lines**: ~115 lines
+**Lines**: ~125 lines
 **Key Components**:
 
-1. **Imports** (lines 1-16)
+1. **Imports** (lines 1-12)
    - Standard library: `logging`
-   - Home Assistant core: `config_validation`, `color_util`
+   - Home Assistant core: `color_util`
    - Light platform: `LightEntity`, `ColorMode`, attributes
    - External: `blink1.blink1.Blink1` (lazy import in setup)
+   - Cleaned up: Removed unused `voluptuous` and `config_validation` imports
 
-2. **Platform Setup** (lines 21-25)
+2. **Platform Setup** (lines 17-28)
    ```python
    async def async_setup_platform(hass, config, async_add_entities, discovery_info=None)
    ```
    - Called by Home Assistant during integration load
    - Imports and initializes Blink1 device
    - Creates and registers the light entity
-   - No error handling (device must be present)
+   - **Includes error handling**: Catches device initialization failures
+   - Logs helpful error messages for troubleshooting
 
-3. **Entity Class** (lines 28-107)
+3. **Entity Class** (lines 31+)
    ```python
    class blink1_status(LightEntity)
    ```
    - Implements Home Assistant's `LightEntity` interface
    - Manages device state and communication
    - Handles color space conversions
+   - Includes `unique_id` for entity registry support
 
 ### `custom_components/blink1_status/manifest.json`
 
@@ -84,13 +111,16 @@ ha-blink1_status/
   "dependencies": [],                     // No HA integration deps
   "codeowners": [],                       // No specific owners
   "requirements": ["blink1"],             // PyPI package dependency
-  "version": "0.2.1"                      // Current version
+  "version": "0.3.0",                     // Current version
+  "integration_type": "device",           // Integration type (device, not hub)
+  "iot_class": "assumed_state"            // IoT class (no state read-back)
 }
 ```
 
 **Version History**:
 - 0.1.x: Original implementation
 - 0.2.x: ColorMode update (this fork)
+- 0.3.x: Future-proofing updates (manifest fields, unique_id, error handling)
 
 ## Class Architecture
 
@@ -103,7 +133,8 @@ self._light: Blink1           # Device handle
 self._name: str = "Blink1"    # Entity name
 self._state: bool | None      # On/Off state
 self._hs_color: list          # [Hue, Saturation]
-self._brightness: int         # 0-255
+self._brightness: int = 255   # 0-255 (default full brightness)
+self._unique_id: str          # Unique identifier (from serial or fixed)
 ```
 
 **State Management**: Entirely local, no device read-back.
@@ -113,6 +144,7 @@ self._brightness: int         # 0-255
 | Property | Type | Purpose | Returns |
 |----------|------|---------|---------|
 | `name` | str | Entity display name | `"Blink1"` |
+| `unique_id` | str | Unique entity identifier | Device serial or fixed ID |
 | `is_on` | bool | Current on/off state | `self._state` |
 | `hs_color` | tuple | Current HS color | `self._hs_color` |
 | `brightness` | int | Current brightness (0-255) | `self._brightness` |

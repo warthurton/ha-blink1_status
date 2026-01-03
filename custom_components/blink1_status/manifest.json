@@ -5,5 +5,7 @@
   "dependencies": [],
   "codeowners": [],
   "requirements": ["blink1"],
-  "version": "0.2.1"
+  "version": "0.3.0",
+  "integration_type": "device",
+  "iot_class": "assumed_state"
 }
